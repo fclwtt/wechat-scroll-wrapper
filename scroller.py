@@ -37,8 +37,24 @@ class WeChatScroller:
         self.scroll_pause = self.config.get('scroll_pause', 0.3)
         self.scroll_compensation = self.config.get('scroll_compensation', 0)
         
+        # 写入诊断日志
+        self._log_config_loaded()
+        
         # 安全设置：鼠标移到角落取消
         pyautogui.FAILSAFE = True
+    
+    def _log_config_loaded(self):
+        """写入配置加载日志，用于诊断"""
+        try:
+            log_path = os.path.join(os.path.dirname(get_config_path()), 'scroll_debug.log')
+            with open(log_path, 'w', encoding='utf-8') as f:
+                f.write(f"Config loaded from: {get_config_path()}\n")
+                f.write(f"scroll_compensation: {self.scroll_compensation}\n")
+                f.write(f"dy_same: {self.dy_same}\n")
+                f.write(f"dy_cross: {self.dy_cross}\n")
+                f.write(f"target_pos: {self.target_x}, {self.target_y}\n")
+        except Exception:
+            pass  # 日志写入失败不影响主功能
     
     def get_pixel_color(self, x, y):
         """获取指定坐标的像素颜色"""
