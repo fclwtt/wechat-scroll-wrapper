@@ -10,6 +10,7 @@
     "max_fine_tune_steps": 5,
     "fine_tune_threshold": 3,
     "scroll_pause": 0.3,
+    "scroll_compensation": 10,
     "button_x": 100,
     "button_y": 100,
     "button_width": 120,

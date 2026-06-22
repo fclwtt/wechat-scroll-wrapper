@@ -35,6 +35,7 @@ class WeChatScroller:
         self.separator_color = self.config.get('separator_color', [230, 230, 230])
         self.color_tolerance = self.config.get('color_tolerance', 30)
         self.scroll_pause = self.config.get('scroll_pause', 0.3)
+        self.scroll_compensation = self.config.get('scroll_compensation', 0)
         
         # 安全设置：鼠标移到角落取消
         pyautogui.FAILSAFE = True
@@ -94,16 +95,19 @@ class WeChatScroller:
         if amount is None:
             amount = self.detect_scroll_amount()
         
+        # 加上补偿值
+        actual_amount = amount + self.scroll_compensation
+        
         # 移动到滚动区域
         pyautogui.moveTo(self.scroll_x, self.scroll_y)
         time.sleep(0.1)
         
         # 执行滚动（负值=向下）
-        pyautogui.scroll(-amount)
+        pyautogui.scroll(-actual_amount)
         time.sleep(self.scroll_pause)
         
         scroll_type = '跨字母' if amount == self.dy_cross else '同字母'
-        print(f"[滚动] amount={amount}, type={scroll_type}")
+        print(f"[滚动] amount={amount} + 补偿{self.scroll_compensation} = {actual_amount}, type={scroll_type}")
         return amount
     
     def next_contact(self):
@@ -125,15 +129,16 @@ class WeChatScroller:
 
 
 if __name__ == '__main__':
-    # 测试：手动按 Ctrl+C 退出
-    scroller = WeChatScroller()
-    print("滚动测试模式，按 Ctrl+C 退出")
-    print(f"目标坐标: {scroller.target_x}, {scroller.target_y}")
-    print(f"dy_same={scroller.dy_same}, dy_cross={scroller.dy_cross}")
-    
-    try:
-        while True:
-            input("按 Enter 滚动到下一个联系人...")
-            scroller.next_contact()
-    except KeyboardInterrupt:
-        print("\n退出")
+    # 仅在直接运行此脚本时执行（打包后不会触发）
+    if not getattr(sys, 'frozen', False):
+        scroller = WeChatScroller()
+        print("滚动测试模式，按 Ctrl+C 退出")
+        print(f"目标坐标: {scroller.target_x}, {scroller.target_y}")
+        print(f"dy_same={scroller.dy_same}, dy_cross={scroller.dy_cross}")
+        
+        try:
+            while True:
+                input("按 Enter 滚动到下一个联系人...")
+                scroller.next_contact()
+        except KeyboardInterrupt:
+            print("\n退出")
