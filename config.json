@@ -1,0 +1,17 @@
+{
+    "target_pos": [0, 0],
+    "scroll_pos": [0, 0],
+    "dy_same": 56,
+    "dy_cross": 88,
+    "probe_offset": 30,
+    "separator_color": [230, 230, 230],
+    "color_tolerance": 30,
+    "fine_tune_enabled": true,
+    "max_fine_tune_steps": 5,
+    "fine_tune_threshold": 3,
+    "scroll_pause": 0.3,
+    "button_x": 100,
+    "button_y": 100,
+    "button_width": 120,
+    "button_height": 50
+}
