@@ -122,6 +122,14 @@ class WeChatScroller:
         pyautogui.scroll(-actual_amount)
         time.sleep(self.scroll_pause)
         
+        # 写入滚动日志
+        try:
+            log_path = os.path.join(os.path.dirname(get_config_path()), 'scroll_debug.log')
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(f"[SCROLL] base={amount}, compensation={self.scroll_compensation}, actual={actual_amount}\n")
+        except Exception:
+            pass
+        
         scroll_type = '跨字母' if amount == self.dy_cross else '同字母'
         print(f"[滚动] amount={amount} + 补偿{self.scroll_compensation} = {actual_amount}, type={scroll_type}")
         return amount
