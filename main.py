@@ -4,15 +4,32 @@
 """
 import tkinter as tk
 import json
+import sys
 import os
-import threading
+
+# Windows DPI 感知
+if sys.platform == 'win32':
+    try:
+        import ctypes
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
 from scroller import WeChatScroller
+from utils import get_config_path
 
 
 class ScrollButton:
     def __init__(self):
-        # 加载配置
-        config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+        # 加载配置（exe 同目录）
+        config_path = get_config_path()
+        
+        if not os.path.exists(config_path):
+            print(f"错误: 找不到配置文件 {config_path}")
+            print("请先运行 WeChatCalibrate.exe 进行校准")
+            input("按 Enter 退出...")
+            sys.exit(1)
+        
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
         
@@ -97,7 +114,7 @@ class ScrollButton:
             print(f"[错误] {e}")
         
         # 恢复按钮
-        self.button.config(bg="#4CAF50", text=f"下一步\n(点击滚动)")
+        self.button.config(bg="#4CAF50", text="下一步\n(点击滚动)")
         self.root.update()
     
     def on_close(self):
@@ -111,5 +128,6 @@ class ScrollButton:
 
 
 if __name__ == '__main__':
+    import json  # 移到顶部避免重复
     app = ScrollButton()
     app.run()

@@ -4,8 +4,20 @@
 """
 import json
 import time
+import sys
+import os
 import pyautogui
 from PIL import ImageGrab
+
+# Windows DPI 感知
+if sys.platform == 'win32':
+    try:
+        import ctypes
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
+from utils import get_config_path, get_base_dir
 
 
 def get_pixel_color(x, y):
@@ -55,9 +67,11 @@ def calibrate():
     print("微信通讯录滚动校准工具")
     print("=" * 50)
     
+    config_path = get_config_path()
+    
     # 加载现有配置
     try:
-        with open('config.json', 'r', encoding='utf-8') as f:
+        with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
     except FileNotFoundError:
         config = {}
@@ -117,12 +131,12 @@ def calibrate():
         config['separator_color'] = list(sep_color)
         print(f"✓ 分隔符颜色: {sep_color}")
     
-    # 保存配置
-    with open('config.json', 'w', encoding='utf-8') as f:
+    # 保存配置到 exe 同目录
+    with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=4)
     
     print("\n" + "=" * 50)
-    print("✓ 校准完成！配置已保存到 config.json")
+    print(f"✓ 校准完成！配置已保存到: {config_path}")
     print("=" * 50)
     print(f"\n配置摘要:")
     print(f"  目标坐标: {config['target_pos']}")
@@ -130,7 +144,7 @@ def calibrate():
     print(f"  dy_same (同字母): {config.get('dy_same', '未设置')}")
     print(f"  dy_cross (跨字母): {config.get('dy_cross', '未设置')}")
     print(f"  分隔符颜色: {config.get('separator_color', '未设置')}")
-    print("\n现在可以运行 main.py 启动滚动按钮了")
+    print("\n现在可以运行 WeChatScroller.exe 启动滚动按钮了")
 
 
 if __name__ == '__main__':

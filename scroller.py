@@ -3,12 +3,27 @@
 """
 import json
 import time
+import sys
+import os
 import pyautogui
 from PIL import ImageGrab
 
+# Windows DPI 感知 - 必须在导入 pyautogui 后、使用任何坐标前调用
+if sys.platform == 'win32':
+    try:
+        import ctypes
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
+from utils import get_config_path
+
 
 class WeChatScroller:
-    def __init__(self, config_path='config.json'):
+    def __init__(self, config_path=None):
+        if config_path is None:
+            config_path = get_config_path()
+        
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
         
@@ -16,10 +31,10 @@ class WeChatScroller:
         self.scroll_x, self.scroll_y = self.config['scroll_pos']
         self.dy_same = self.config['dy_same']
         self.dy_cross = self.config['dy_cross']
-        self.probe_offset = self.config['probe_offset']
-        self.separator_color = self.config['separator_color']
-        self.color_tolerance = self.config['color_tolerance']
-        self.scroll_pause = self.config['scroll_pause']
+        self.probe_offset = self.config.get('probe_offset', 30)
+        self.separator_color = self.config.get('separator_color', [230, 230, 230])
+        self.color_tolerance = self.config.get('color_tolerance', 30)
+        self.scroll_pause = self.config.get('scroll_pause', 0.3)
         
         # 安全设置：鼠标移到角落取消
         pyautogui.FAILSAFE = True
@@ -87,7 +102,8 @@ class WeChatScroller:
         pyautogui.scroll(-amount)
         time.sleep(self.scroll_pause)
         
-        print(f"[滚动] amount={amount}, type={'跨字母' if amount == self.dy_cross else '同字母'}")
+        scroll_type = '跨字母' if amount == self.dy_cross else '同字母'
+        print(f"[滚动] amount={amount}, type={scroll_type}")
         return amount
     
     def next_contact(self):
@@ -95,15 +111,16 @@ class WeChatScroller:
         return self.scroll()
     
     def update_config(self, **kwargs):
-        """动态更新配置"""
+        """动态更新配置（保存到 exe 同目录）"""
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
             if key in self.config:
                 self.config[key] = value
         
-        # 持久化
-        with open('config.json', 'w', encoding='utf-8') as f:
+        # 持久化到 exe 同目录
+        config_path = get_config_path()
+        with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(self.config, f, ensure_ascii=False, indent=4)
 
 
